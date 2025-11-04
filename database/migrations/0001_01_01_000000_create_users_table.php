@@ -12,13 +12,48 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
+            $table->uuid('id')->primary();
+
+            // Основні дані
+            $table->string('name')->nullable();
+            $table->string('lastname')->nullable();
+            $table->string('middlename')->nullable();
+            $table->string('login')->nullable()->index();
+
+            $table->string('email')->nullable()->index();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('phone')->nullable()->index();
+            $table->timestamp('phone_verified_at')->nullable();
+            $table->string('telegram_id')->nullable();
+
+            // Пароль та авторизація
+            $table->string('password')->nullable();
             $table->rememberToken();
+
+            // Статуси та роль
+            $table->string('status')->nullable();
+            $table->decimal('discount')->default(0);
+            $table->string('created_type')->nullable()->index();
+            $table->string('created_step')->nullable()->index();
+            $table->string('role')->nullable();
+
+            // Додаткові дані
+            $table->date('birthday')->nullable();
+            $table->json('added')->nullable();
+            $table->json('contacts')->nullable();
+            $table->json('fields')->nullable();
+            $table->json('notifies')->nullable();
+            $table->text('comment')->nullable();
+
+            // Локалізація
+            $table->string('locale_code')->nullable()->index();
+
+            // Активність та реєстрація
+            $table->timestamp('activity_at')->nullable();
+            $table->timestamp('registered_at')->nullable();
+
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

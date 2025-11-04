@@ -15,11 +15,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $this->command->info('Available seeders:');
+        $this->command->warn(' php artisan db:seed --class=PrimarySeeder');
+        $this->command->warn(' php artisan db:seed --class=DummySeeder');
+        $this->command->info('Enjoy!');
     }
 }
