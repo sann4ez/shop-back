@@ -22,14 +22,11 @@
 <script>
     const LANGUAGE = $('html').attr('lang') || 'en';
 
-    {{--$.ajaxSetup({--}}
-    {{--    headers: {--}}
-    {{--        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),--}}
-    {{--        //'S-Domain': '{{ \Domain::getSelected('host') }}',--}}
-    {{--        'sHost': '{{ \Domain::getSelected('host') }}',--}}
-    {{--        'sLocale': '{{ \Domain::getLocale() }}'--}}
-    {{--    }--}}
-    {{--});--}}
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        }
+    });
 
     var initEditors = function () {
         },

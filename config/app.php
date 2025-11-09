@@ -244,9 +244,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
-        'Domain' => \App\Support\Domains\Facades\Domain::class,
         'Variable' => Fomvasss\Variable\Facade::class,
-        'Favorite' => \App\Support\Favorites\Facades\Favorites::class,
     ],
 
 ];

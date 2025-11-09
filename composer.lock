@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c9cd05e1b5c9ce26b171c0f9d04a338d",
+    "content-hash": "108468b28c5e5e2c6311ce44a774575f",
     "packages": [
         {
             "name": "brick/math",
@@ -777,6 +777,68 @@
                 "source": "https://github.com/fomvasss/laravel-medialibrary-extension/tree/6.2.0"
             },
             "time": "2025-06-24T10:33:05+00:00"
+        },
+        {
+            "name": "fomvasss/laravel-simple-taxonomy",
+            "version": "1.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fomvasss/laravel-simple-taxonomy.git",
+                "reference": "b005a0de623520acf84a4ab4c0fa7011f85e422e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fomvasss/laravel-simple-taxonomy/zipball/b005a0de623520acf84a4ab4c0fa7011f85e422e",
+                "reference": "b005a0de623520acf84a4ab4c0fa7011f85e422e",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/support": "^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "kalnoy/nestedset": "^5.0|^6.0",
+                "php": ">=7.4"
+            },
+            "type": "composer-package",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Fomvasss\\SimpleTaxonomy\\TaxonomyServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Fomvasss\\SimpleTaxonomy\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Vasyl Fomin",
+                    "email": "fomvasss@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Create and manage taxonomy (terms) in Laravel App",
+            "homepage": "https://github.com/fomvasss/laravel-simple-taxonomy",
+            "keywords": [
+                "categories",
+                "categorization",
+                "fomvasss",
+                "laravel",
+                "nestedset",
+                "taxonomy",
+                "terms",
+                "tree"
+            ],
+            "support": {
+                "issues": "https://github.com/fomvasss/laravel-simple-taxonomy/issues",
+                "source": "https://github.com/fomvasss/laravel-simple-taxonomy/tree/1.6.0"
+            },
+            "time": "2025-06-24T10:38:22+00:00"
         },
         {
             "name": "fomvasss/laravel-variables",

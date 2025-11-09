@@ -10,6 +10,7 @@
         "fomvasss/laravel-blocks": "^1.4",
         "fomvasss/laravel-lte3": "^1.86",
         "fomvasss/laravel-medialibrary-extension": "^6.2",
+        "fomvasss/laravel-simple-taxonomy": "^1.6",
         "fomvasss/laravel-variables": "^5.7",
         "ka4ivan/laravel-logger": "^2.0",
         "ka4ivan/laravel-view-sortable": "^1.1",

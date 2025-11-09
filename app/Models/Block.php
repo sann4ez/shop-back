@@ -63,7 +63,7 @@ class Block extends \Fomvasss\Blocks\Models\Block
      */
     public static function typesList(string $columnKey = null, string $indexKey = null): array
     {
-        $status = \Domain::getOpt('blocks.types', []);
+        $status = [];
 
         return self::staticListBuild($status, $columnKey, $indexKey);
     }
@@ -111,6 +111,20 @@ class Block extends \Fomvasss\Blocks\Models\Block
     public function getStatus(string $column = 'name'): string|array|null
     {
         return self::statusesList($column, 'key')[$this->status] ?? null;
+    }
+
+    /**
+     * Скрін блоку з фронта.
+     *
+     * @param string $typeData
+     * @return string
+     */
+    public static function getScreen(array $typeData): string
+    {
+        $img = '/files/blocks/' . \Domain::getHost() . '/'. $typeData['key'] .'.png';
+        $img = file_exists(public_path($img)) ? asset($img) : $typeData['screen'] ?? '';
+
+        return $img;
     }
 
     public function scopeFilterable(Builder $builder, array $attrs = [], array $default = [])
