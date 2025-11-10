@@ -374,9 +374,8 @@ class ProductVariation extends Model implements HasMedia
     {
         return request('limit')
             ?: request('per_page')
-                ?:\Domain::getOpt('variations.per_pages.'.request('view', 'card'))
-                    ?: \session('per_page')
-                        ?: $this->perPage;
+                ?: \session('per_page')
+                    ?: $this->perPage;
     }
 
     /**
@@ -507,10 +506,10 @@ class ProductVariation extends Model implements HasMedia
     public function getClientStates(): array
     {
         return [
-            'is_favorite' => $this->isFavorite(),
-            'in_cart' => $this->inCart(),
-            'count_cart' => $this->countCart(),
-            'in_comparison' => $this->isComparison(),
+//            'is_favorite' => $this->isFavorite(),
+//            'in_cart' => $this->inCart(),
+//            'count_cart' => $this->countCart(),
+//            'in_comparison' => $this->isComparison(),
         ];
     }
 
@@ -573,7 +572,7 @@ class ProductVariation extends Model implements HasMedia
      */
     public function getNameList(): string
     {
-        $nameToken = \Domain::getOpt('variations.name_format_in_list', '[variation:name]');
+        $nameToken = '[product:name]';
 
         return $this->makeName($nameToken);
     }

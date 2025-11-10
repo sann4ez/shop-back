@@ -317,6 +317,16 @@ class User extends Authenticatable implements HasMedia
     }
 
     /**
+     * Ролі, дозволені при реєстрації.
+     *
+     * @return string[]
+     */
+    public static function allowedRegisterRoles(): array
+    {
+        return [self::ROLE_GUEST, self::ROLE_CLIENT];
+    }
+
+    /**
      * Пароль для акаунту.
      *
      * @return string
