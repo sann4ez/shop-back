@@ -34,7 +34,7 @@ class BlockRequest extends FormRequest
         if ($this->isMethod('post') || $this->has('slug')) {
             if ($slug = $this->slug ?? $this->name) {
                 $this->merge([
-                    'slug' => Block::slugGenerate($slug, $this->route('block'), \Domain::getOpt('blocks.may_unique_slug')),
+                    'slug' => Block::slugGenerate($slug, $this->route('block'), true),
                 ]);
             }
         }

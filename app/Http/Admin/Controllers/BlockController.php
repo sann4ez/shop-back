@@ -14,7 +14,7 @@ final class BlockController extends Controller
     {
         $blocks = Block::filterable();
 
-        return view('admin.blocks.index', ['blocks' => $blocks->with('translations')->paginate(100), 'type' => $this->getType($request->type)]);
+        return view('admin.blocks.index', ['blocks' => $blocks->paginate(100), 'type' => $this->getType($request->type)]);
     }
 
     public function create(Request $request)

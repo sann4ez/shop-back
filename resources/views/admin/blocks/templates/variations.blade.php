@@ -1,12 +1,10 @@
-{!! Lte3::hidden('type', 'variations') !!}
-
 {!! Lte3::text('content[title]', null, ['label' => 'Заголовок']) !!}
 
 {!! Lte3::hidden('ids', '') !!}
 @isset($block)
     @php
         $ids = $block->getIds('variations', []);
-        $variations = \App\Models\Shop\ProductVariation::whereIn('id', $ids)->with('translations')->get();
+        $variations = \App\Models\ProductVariation::whereIn('id', $ids)->get();
     @endphp
     {!! Lte3::select2('ids[variations]', $ids, $variations->pluck('name', 'id')->toArray(), [
         'label' => 'Варіації',

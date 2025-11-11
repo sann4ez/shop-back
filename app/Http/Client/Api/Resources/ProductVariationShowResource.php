@@ -25,36 +25,14 @@ final class ProductVariationShowResource extends JsonResource
             'prices' => $this->getPrices(),
             'states' => $this->getClientStates(),
 
-            'fields' => $this->getPrepareFields(),
-
-//            'markers' => optional($this->product)->relationLoaded('markers')
-//                ? ItemMarkerListResource::collection($this->getMarkers())
-//                : [],
-
-            'images' => $this->getImagesResource($this->getImages()),
             'product' => $this->whenLoaded('product', fn () => ProductShowResource::make($this->product)),
         ];
 
-//        $res['specification'] = match (\Domain::getOpt('variations.formats.specification')) {
-//            'getAttributesPropertiesList2' => $this->whenLoaded('properties', fn()=> $this->getAttributesPropertiesList2()),
-//            default => $this->whenLoaded('properties', fn()=> $this->getAttributesPropertiesListArray2('name', 'value')),
-//        };
+        $res['specification'] = match ('getAttributesPropertiesList2') {
+            'getAttributesPropertiesList2' => $this->whenLoaded('properties', fn()=> $this->getAttributesPropertiesList2()),
+            default => $this->whenLoaded('properties', fn()=> $this->getAttributesPropertiesListArray2('name', 'value')),
+        };
 
         return $res;
-    }
-
-    protected function getImagesResource(Collection $medias)
-    {
-        $altTemplates = \App\Models\ProductVariation::getImagesSeoSettings();
-
-        if (count($altTemplates)) {
-            return $medias->map(function (Media $media, $index) use ($altTemplates) {
-                $template = $altTemplates[$index]['alt'] ?? $index;
-                $alt = \StrToken::setEntities(['product' => $this->product, 'variation' => $this->resource])->setText($template)->replace();
-                return MediaShowResource::make($media->setAttribute('alt', $alt));
-            });
-        }
-
-        return MediaShowResource::collection($medias);
     }
 }

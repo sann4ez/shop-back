@@ -63,12 +63,12 @@ Route::group([
     Route::get('suggest/product-variations', [\App\Http\Admin\Controllers\SuggestController::class, 'productVariations'])->name('suggest.product-variations');
 });
 
-//Route::group([
-//    'as' => 'unisharp.lfm.',
-//    'middleware' => [
-//        'web', 'auth',
-//        \UniSharp\LaravelFilemanager\Middlewares\CreateDefaultFolder::class,
-//        \UniSharp\LaravelFilemanager\Middlewares\MultiUser::class]
-//], function() {
-//    Route::get('filemanager/jsonitems', [\App\Http\Admin\Controllers\LfmItemsController::class, 'getItems'])->name('getItems');
-//});
+Route::group([
+    'as' => 'unisharp.lfm.',
+    'middleware' => [
+        'web', 'auth',
+        \UniSharp\LaravelFilemanager\Middlewares\CreateDefaultFolder::class,
+        \UniSharp\LaravelFilemanager\Middlewares\MultiUser::class]
+], function() {
+    Route::get('filemanager/jsonitems', [\App\Http\Admin\Controllers\LfmItemsController::class, 'getItems'])->name('getItems');
+});

@@ -47,15 +47,10 @@ trait VariationFilter
             );
 
         // --- Пошук за назвою ---
-        $query->when(isset($params['search']), fn($q) =>
-        $q->where(function ($q2) use ($params) {
-            $term = trim($params['search']);
-            $q2->where('name', 'like', "%{$term}%")
-                ->orWhereHas('translations', fn($qt) =>
-                $qt->where('name', 'like', "%{$term}%")
-                );
-        })
-        );
+        $query->when(isset($params['q']), function ($q) use ($params) {
+            $term = trim($params['q']);
+            $q->where('name', 'like', "%{$term}%");
+        });
 
         // --- Сортування ---
         $query->when(isset($params['sort']), function ($q) use ($params, $default) {

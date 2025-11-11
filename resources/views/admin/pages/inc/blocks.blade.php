@@ -20,7 +20,7 @@
     </div>
 </div>
 
-@php($blocks = $page->blocks->load('translations'))
+@php($blocks = $page->blocks)
 @if($blocks->count())
 <table class="table table-hover">
     <thead>
@@ -82,7 +82,7 @@
                 </div>
                 <div class="modal-body">
 
-                    {!! Lte3::select2('ids', null, \App\Models\Block::with('translations')->latest()->get()->pluck('name', 'id')->toArray(), [
+                    {!! Lte3::select2('ids', null, \App\Models\Block::query()->latest()->get()->pluck('name', 'id')->toArray(), [
                         'label' => 'Блоки',
                         'multiple' => true,
                     ]) !!}

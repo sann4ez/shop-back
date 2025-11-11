@@ -245,6 +245,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
         'Variable' => Fomvasss\Variable\Facade::class,
+        'Cart' => \App\Support\Cart\Facades\Cart::class,
     ],
 
 ];

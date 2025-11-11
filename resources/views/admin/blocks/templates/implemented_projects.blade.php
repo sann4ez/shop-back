@@ -1,3 +1,5 @@
+{!! Lte3::text('content[title]', null, ['label' => 'Заголовок']) !!}
+
 {{-- MULTYITEMS: --}}
 <div class="card f-wrap f-multyblocks" data-fn-inits="initLfmBtn">
     <div class="card-body">
@@ -9,6 +11,9 @@
                     <a href="#" class="btn btn-xs btn-danger float-right js-btn-delete"><i
                             class="fa fa-trash"></i></a>
                     <i class="fa fa-arrows-alt-v cursor-move"></i>
+                    {!! Lte3::text('content[items][$i][name]', null, [
+                        'label' => 'Назва',
+                    ]) !!}
                     {!! Lte3::lfmImage('content[items][$i][img]', null, [
                         'label' => 'Зображення',
                     ]) !!}
@@ -26,6 +31,7 @@
                         <a href="#" class="btn btn-xs btn-danger float-right js-btn-delete"><i
                                 class="fa fa-trash"></i></a>
                         <i class="fa fa-arrows-alt-v cursor-move"></i>
+                        {!! Lte3::text("content[items][{$loop->index}][name]", $item['name'] ?? '', ['label' => 'Назва',]) !!}
                         {!! Lte3::lfmImage("content[items][{$loop->index}][img]", $item['img'] ?? '',['label' => 'Зображення'] ) !!}
                         {!! Lte3::hidden("content[items][{$loop->index}][weight]", $item['weight'] ?? 0, ['class' => 'js-input-weight']) !!}
                     </div>

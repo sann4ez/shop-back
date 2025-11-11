@@ -6,8 +6,8 @@ return [
      | -----------------------------------------------------------------
      */
     'model' => [
-        'class' => \Fomvasss\Blocks\Models\Block::class,
-        
+        'class' => \App\Models\Block::class,
+
         'with_loaded' => [
             //'translations',
             //'models'
@@ -15,9 +15,9 @@ return [
     ],
 
     'fieldhandlers' => [
-        \Fomvasss\Blocks\Handlers\ImagecacheHandler::class,
+//        \Fomvasss\Blocks\Handlers\ImagecacheHandler::class,
     ],
-    
+
     'images' => [
         'source' => [
             'disk' => 'public',
@@ -27,7 +27,7 @@ return [
                 'photos/shares',
             ],
         ],
-        
+
         'cache' => [
             'disk' => 'blocks', // Add config disk!
             'format' => 'webp',
@@ -41,7 +41,7 @@ return [
 //            'url' => env('APP_URL').'/storage/blocks',
 //            'visibility' => 'public',
 //        ],
-        
+
         'extensions' => '/\.(jpeg|jpg|png|gif)$/',
     ]
 ];

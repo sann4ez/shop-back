@@ -4,7 +4,6 @@
 <div class="row">
     <div class="col-md-9">
         @includeFirst([
-            'admin.blocks.templates.'.\Domain::getSelected('host').".{$type['key']}",
             "admin.blocks.templates.{$type['key']}",
             'admin.blocks.templates.default',
         ], ['type' => $type])

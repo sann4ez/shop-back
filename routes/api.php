@@ -33,23 +33,12 @@ Route::group(['middleware' => [
 
     // PRODUCT-VARIATIONS
     Route::get('shop/variations', [\App\Http\Client\Api\Controllers\ShopController::class, 'variations']);
-    Route::get('shop/variations/revieweds', [\App\Http\Client\Api\Controllers\ShopController::class, 'revieweds']);
     Route::get('shop/variations/facet', [\App\Http\Client\Api\Controllers\ShopController::class, 'facet']);
     Route::get('shop/variations/{variation:slug}', [\App\Http\Client\Api\Controllers\ShopController::class, 'variation']);
 
     Route::get('shop/categories', [\App\Http\Client\Api\Controllers\ShopController::class, 'categories']);
     Route::get('shop/categories/tree/view', [\App\Http\Client\Api\Controllers\ShopController::class, 'categoriesTree']);
     Route::get('shop/categories/{category:slug}', [\App\Http\Client\Api\Controllers\ShopController::class, 'category']);
-    Route::get('shop/brands', [\App\Http\Client\Api\Controllers\ShopController::class, 'brands']);
-    Route::get('shop/brands/{brand:slug}', [\App\Http\Client\Api\Controllers\ShopController::class, 'brand']);
-
-    // TERMS TODO: Deprecated
-    Route::get('terms', [\App\Http\Client\Api\Controllers\TermController::class, 'index']);
-    Route::get('terms/{term:slug}', [\App\Http\Client\Api\Controllers\TermController::class, 'show']);
-
-    // MEDIA
-    Route::post('media', [\App\Http\Client\Api\Controllers\MediaController::class, 'upload']);
-    Route::delete('media/{media}', [\App\Http\Client\Api\Controllers\MediaController::class, 'delete']);
 
     // SUGGEST
     Route::controller(\App\Http\Client\Api\Controllers\SuggestController::class)->group(function() {

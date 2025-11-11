@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\Cart\Cart;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\URL;
@@ -14,7 +15,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(Cart::class, function () {
+            return new Cart();
+        });
     }
 
     /**

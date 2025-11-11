@@ -213,7 +213,7 @@ class ProductVariation extends Model implements HasMedia
     public function getRelateds()
     {
         if ($ids = Arr::wrap($this->getAdded('relateds'))) {
-            $variations = self::whereIn('id', $ids)->with('translations', 'media.model', 'product.media.model', 'product.category', 'product.category.promotions', 'product.translations', 'promotions')->get();
+            $variations = self::whereIn('id', $ids)->with('media.model', 'product.media.model', 'product.category', 'product.category.promotions')->get();
 
             return $variations->sortBy(fn ($item) => array_search($item->id, $ids));
         }
@@ -507,8 +507,8 @@ class ProductVariation extends Model implements HasMedia
     {
         return [
 //            'is_favorite' => $this->isFavorite(),
-//            'in_cart' => $this->inCart(),
-//            'count_cart' => $this->countCart(),
+            'in_cart' => $this->inCart(),
+            'count_cart' => $this->countCart(),
 //            'in_comparison' => $this->isComparison(),
         ];
     }
@@ -572,7 +572,7 @@ class ProductVariation extends Model implements HasMedia
      */
     public function getNameList(): string
     {
-        $nameToken = '[product:name]';
+        $nameToken = '[variation:name]';
 
         return $this->makeName($nameToken);
     }
@@ -630,7 +630,7 @@ class ProductVariation extends Model implements HasMedia
     {
         $terms = [];
         if ($this->product && $this->product->category_id) {
-            $terms = Term::with('translations')->defaultOrder()->ancestorsAndSelf($this->product->category_id);
+            $terms = Term::query()->defaultOrder()->ancestorsAndSelf($this->product->category_id);
         }
 
         $res = [];
@@ -799,7 +799,7 @@ class ProductVariation extends Model implements HasMedia
      */
     public static function getImagesSeoSettings(): array
     {
-        $settings = \Variable::getArray('seo.products.images', [], \Domain::getGroup()) ?: [];
+        $settings = \Variable::getArray('seo.products.images', []) ?: [];
 
         usort($settings, fn ($a, $b) => (int) $a['weight'] <=> (int) $b['weight']);
 

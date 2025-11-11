@@ -40,7 +40,7 @@ class Block extends \Fomvasss\Blocks\Models\Block
 
     public static function getCacheName(string $slug): string
     {
-        return md5(serialize("block-{$slug}-" . \Domain::getGroup()));
+        return md5(serialize("block-{$slug}-"));
     }
 
     /**
@@ -63,7 +63,33 @@ class Block extends \Fomvasss\Blocks\Models\Block
      */
     public static function typesList(string $columnKey = null, string $indexKey = null): array
     {
-        $status = [];
+        $status = [
+            [
+                'key' => 'slider',
+                'name' => 'Верхній слайдер (головна)',
+                'screen' => '',
+            ],
+            [
+                'key' => 'variations',
+                'name' => 'Товари',
+                'screen' => '',
+            ],
+            [
+                'key' => 'our_services',
+                'name' => 'Наші послуги',
+                'screen' => '',
+            ],
+            [
+                'key' => 'implemented_projects',
+                'name' => 'Приклади реалізованих проєктів',
+                'screen' => '',
+            ],
+            [
+                'key' => 'why_me',
+                'name' => 'Чому ми',
+                'screen' => '',
+            ],
+        ];
 
         return self::staticListBuild($status, $columnKey, $indexKey);
     }
@@ -121,7 +147,7 @@ class Block extends \Fomvasss\Blocks\Models\Block
      */
     public static function getScreen(array $typeData): string
     {
-        $img = '/files/blocks/' . \Domain::getHost() . '/'. $typeData['key'] .'.png';
+        $img = '/files/blocks/'. $typeData['key'] .'.png';
         $img = file_exists(public_path($img)) ? asset($img) : $typeData['screen'] ?? '';
 
         return $img;
