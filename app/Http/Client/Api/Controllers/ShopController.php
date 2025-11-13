@@ -561,7 +561,7 @@ final class ShopController extends Controller
      */
     public function categories(Request $request)
     {
-        $term = Term::whereVocabulary(Term::VOCABULARY_PRODUCT_CATEGORIES)->where('status', Term::STATUS_PUBLISHED)->with('media', 'translations')->filterable()->get();
+        $term = Term::whereVocabulary(Term::VOCABULARY_PRODUCT_CATEGORIES)->with('media')->filterable()->get();
 
         return ProductCategoryListResource::collection($term);
     }
@@ -601,59 +601,10 @@ final class ShopController extends Controller
     public function categoriesTree(Request $request)
     {
         $categories = Term::byVocabulary(Term::VOCABULARY_PRODUCT_CATEGORIES)
-            ->where('status', Term::STATUS_PUBLISHED)
-            ->with('media', 'translations')
+            ->with('media')
             ->get()->toTree();
 
         return ProductCategoryListResource::collection($categories);
-    }
-
-    /**
-     *  @api {get} /api/shop/categories/{category:slug} 05. Одна категорія
-     *  @apiVersion 1.0.0
-     *  @apiName ShopCategory
-     *  @apiGroup Shop
-     *
-     *  @apiSuccessExample {json} Response-Success: HTTP/1.1 200 OK
-     *  {
-     *      "data": {
-     *          "id": "47439c16-0912-48fd-ae10-2e97e3f2a1de",
-     *          "entity": "product_categories",
-     *          "slug": "dlia-kotiv",
-     *          "name": "Для котів",
-     *          "body": null,
-     *          "icon": null,
-     *          "image": null,
-     *          "logo": null,
-     *          "filter": {
-     *              "groped_type": null
-     *          }
-     *      },
-     *      "seo": {
-     *          "metatags": {
-     *              "title": " - Dropshop",
-     *              "robots": "index, follow",
-     *              "og_site_name": "Dropshop",
-     *              "og_locale": "uk",
-     *              "og_title": " - Dropshop",
-     *              "og_type": "page",
-     *              "twitter_title": " - Dropshop"
-     *          },
-     *          "h1": "",
-     *          "text": "",
-     *          "faq": []
-     *      },
-     *      "crumbs": [],
-     *      "sblocks": []
-     *  }
-     */
-    public function category(Request $request, Term $category)
-    {
-        $category->checkAllowed()->load('media', 'translations', 'ancestors.translations');
-
-        return ProductCategoryShowResource::make($category)->additional([
-            'crumbs' => TermSimpleResource::collection($category->ancestors), // TODO Check
-        ]);
     }
 
     /**
