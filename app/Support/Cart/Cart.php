@@ -2,15 +2,10 @@
 
 namespace App\Support\Cart;
 
-use App\Events\OrderOrdered;
-use App\Models\Auth\User;
-use App\Models\Item;
-use App\Models\Shop\Discount;
-use App\Models\Shop\Order;
-use App\Models\Shop\ProductVariation;
-use App\Models\Shop\Promocode;
-use App\Models\Shop\Promotion;
-use App\Models\Shop\Purchase;
+use App\Models\User;
+use App\Models\Order;
+use App\Models\ProductVariation;
+use App\Models\Purchase;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -28,9 +23,7 @@ class Cart
     public static $cartKey = 'sCart';
 
     protected $orderRelations = [
-        'purchases.model.translations',                         // для виведення назви, ціни, sku
-        'discounts.promotion',                                  // для обчислення знижки
-        'purchases.model.product.translations',                 // для виведення назви...
+        'purchases.model.product',                 // для виведення назви...
         //'purchases.model.product.category',   // для виведення урл на варіант
         //'purchases.model.properties.attribute', // для getAttributesPropertiesListStr()
         //'purchases.model.product.media',
@@ -90,7 +83,7 @@ class Cart
             if ($order = Order::whereType(Order::TYPE_CART)
                 ->whereId($this->getId())->first()) {
 
-                $this->order = $order->loadTrans($this->orderRelations);
+                $this->order = $order->load($this->orderRelations);
             }
         }
 
@@ -98,18 +91,13 @@ class Cart
             /** @var Order $order */
             $order = Order::create([
                 'type' => Order::TYPE_CART,
-                'domain_id' => \Domain::getId(),
                 'user_id' => Auth::id(),
-                'currency_code' => \Domain::getSelected('currency_code')
-            ])->loadTrans($this->orderRelations);
-
-            // VISIT
-            \App\Actions\VisitAction::run('cart', $order);
+                'currency_code' => 'UAH'
+            ])->load($this->orderRelations);
 
             \Illuminate\Support\Facades\Cookie::queue(self::$cartKey, $order->id, 43200);
 
             $this->order = $order;
-            $this->recalculateWithPromo();
         }
 
         return $this;
@@ -138,7 +126,7 @@ class Cart
      */
     public function setOrder(Order $order): self
     {
-        $order->loadTrans($this->orderRelations);
+        $order->load($this->orderRelations);
         $this->order = $order;
 
         return $this;
@@ -203,7 +191,7 @@ class Cart
 
         $purchase->freshProductData();
         $this->order->refresh();
-        $this->recalculateWithPromo();
+//        $this->recalculateWithPromo();
 
         return $this;
     }
@@ -232,7 +220,7 @@ class Cart
             }
 
             $this->order->refresh();
-            $this->recalculateWithPromo();
+//            $this->recalculateWithPromo();
         }
 
         return $this;
@@ -274,7 +262,7 @@ class Cart
                 ]);
             }
             $this->order->refresh();
-            $this->recalculateWithPromo();
+//            $this->recalculateWithPromo();
 
             return true;
         }
@@ -300,7 +288,7 @@ class Cart
                 $discount->delete();
 
                 $this->order->refresh();
-                $this->recalculateWithPromo();
+//                $this->recalculateWithPromo();
 
                 return true;
             }
@@ -314,225 +302,225 @@ class Cart
      *
      * @return bool|void
      */
-    protected function recalculateWithPromo()
-    {
-        if ($this->order) {
-
-            $deliverySum = \Variable::getArray('shipping.postal.price', 0, \Domain::getGroup());
-
-            $discountSum = 0;
-            $deliveryDiscountSum = 0;
-            $isFreeDelivery = false;
-            $hasPromotion = false;
-
-            if ($this->order->purchases->count() < 1) {
-                $this->order->fill([
-                    'discount_sum' => 0,
-                    'delivery_sum' => 0,
-                    'delivery_discount_sum' => 0,
-                ]);
-
-                $this->order->setAttribute('added->is_free_delivery', false);
-
-                $this->order->setAttribute('added->has_promotion', false);
-
-                $this->order->save();
-
-                $this->order->discounts()->delete();
-
-                return true;
-            }
-
-            // Варіації (екземпляри), які уже взяли участь в знижці
-            $variationsAlreadyHasDiscountIds = [];
-
-            $promotions = Promotion::isActive()->with('variations:id', 'terms:id')
-                ->select('id', 'added', 'discount_type', 'discount', 'type')
-                ->get();
-                //->filter(fn(Promotion $p) => $p->isAllowedForUser());
-
-            // TODO check: Зжижки при покупці кількості екземпляра варіації
-            foreach ($this->order->purchases as $purchase) {
-                foreach ($promotions->where('type', Promotion::TYPE_DISCOUNT_VARIATION_COUNT) as $promotion) {
-                    if ($discounts = $promotion->added['conditions'] ?? []) {
-                        usort($discounts, function ($item1, $item2) {
-                            return $item2['count'] <=> $item1['count'];
-                        });
-                        if ($promotion->variations->contains('id', $purchase->model_id)) {
-                            foreach ($discounts as $discountData) {
-
-                                if ($purchase->quantity >= $discountData['count']) {
-                                    if ($promotion->discount_type === Promotion::DISCOUNT_TYPE_SUM) {
-                                        $discountVal = $discountData['discount'] ?? 0;
-                                        //$discountSum = $discountSum + $discountVal;
-                                        $purchase->setAttribute('discount', $discountVal)->save();
-                                        $variationsAlreadyHasDiscountIds[] = $purchase->model_id;
-
-                                        $hasPromotion = true;
-                                    } elseif ($promotion->discount_type === Promotion::DISCOUNT_TYPE_PERCENT) {
-                                        $discountVal = ($purchase->price - ($purchase->price - ($discountData['discount'] ?? 0) * $purchase->price / 100));
-                                        //$discountSum = $discountSum + $discountVal;
-                                        $purchase->setAttribute('discount', $discountVal)->save();
-                                        $variationsAlreadyHasDiscountIds[] = $purchase->model_id;
-
-                                        $hasPromotion = true;
-                                    }
-                                    break;
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-
-            // Знижка на замовлення при покупці сумарної кількості вказаних варіацій
-            /** @var Promotion $promotion */
-            foreach ($promotions->where('type', Promotion::TYPE_DISCOUNT_VARIATIONS_COUNT) as $promotion) {
-
-                if ($discounts = $promotion->added['conditions'] ?? []) {
-                    usort($discounts, function ($item1, $item2) {
-                        return $item2['count'] <=> $item1['count'];
-                    });
-
-                    $variationsIds = ProductVariation::query()->byPromotionVariations($promotion)->select('id')->get()->pluck('id')->toArray();
-
-                    $purchases = $this->order->purchases
-                        ->whereNotIn('model_id', $variationsAlreadyHasDiscountIds)
-                        ->whereIn('model_id', $variationsIds);
-                    $quantity = $purchases->sum('quantity');
-                    $sum = $purchases->sum(fn($p) => $p->price * $p->quantity);
-
-                    if ($quantity < 1) {
-                        break;
-                    }
-
-                    $avgPrice = $sum/* / $quantity*/;
-
-                    foreach ($discounts as $discountData) {
-                        if ($quantity >= $discountData['count']) {
-                            if ($promotion->discount_type === Promotion::DISCOUNT_TYPE_SUM) {
-                                $discountVal = $discountData['discount'] ?? 0;
-                                $discountSum = $discountSum + $discountVal;
-                                $variationsAlreadyHasDiscountIds = array_merge($variationsAlreadyHasDiscountIds, $purchases->pluck('model_id')->toArray());
-
-                                $hasPromotion = true;
-                            } elseif ($promotion->discount_type === Promotion::DISCOUNT_TYPE_PERCENT) {
-                                $discountVal = ($avgPrice - ($avgPrice - ($discountData['discount'] ?? 0) * $avgPrice / 100));
-                                $discountSum += $discountSum + $discountVal;
-                                $variationsAlreadyHasDiscountIds = array_merge($variationsAlreadyHasDiscountIds, $purchases->pluck('model_id')->toArray());
-
-                                $hasPromotion = true;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // Знижка на суму замовлення при мінімальній сумі товарів замовлення
-            foreach ($promotions->where('type', Promotion::TYPE_DISCOUNT_ORDER_SUM) as $promotion) {
-                $sum = $this->order->purchases->sum(fn($p) => $p->price * $p->quantity);
-
-                if ($sum >= ($promotion->added['conditions']['sum'] ?? 0)) {
-                    if ($promotion->discount_type === Promotion::DISCOUNT_TYPE_SUM) {
-                        $discountSum += $promotion->discount;
-
-                        $hasPromotion = true;
-                    } elseif ($promotion->discount_type === Promotion::DISCOUNT_TYPE_PERCENT) {
-                        $discountSum = $discountSum + ($sum * $promotion->discount / 100);
-
-                        $hasPromotion = true;
-                    }
-                    break;
-                }
-            }
-
-            // Безкоштовна доставка на суму замовлення при мінімальній сумі товарів замовлення
-            foreach ($promotions->where('type', Promotion::TYPE_FREE_DELIVERY_ORDER_SUM) as $promotion) {
-                $sum = $this->order->purchases->sum(fn($p) => $p->price * $p->quantity);
-
-                if ($sum >= ($promotion->added['conditions']['sum'] ?? 0)) {
-                    $isFreeDelivery = true;
-
-                    $hasPromotion = true;
-                    break;
-                }
-            }
-
-            // Знижки застосовані промокодами
-            /** @var Discount $discount */
-            foreach ($this->order->discounts as $discount) {
-
-                if (($discount->promocode->used_limit > 0) && (!$discount->promocode?->isAllowed())) {
-                    $discount->delete();
-                    continue;
-                }
-
-                /** @var Promotion $promotion */
-                $promotion = $discount->promotion;
-
-                // Безкоштована доставка
-                if (in_array($promotion->type, [Promotion::TYPE_FREE_DELIVERY_CODE, Promotion::TYPE_FREE_DELIVERY_CODE_RULES])) {
-                    $deliverySum = $deliverySum ?: $this->order->delivery_sum;
-                    $deliveryDiscountSum = $deliverySum;
-
-                    $isFreeDelivery = true;
-
-                    $hasPromotion = true;
-                }
-
-                // Знижка на вартість доставки
-                if ($promotion->type === Promotion::TYPE_DISCOUNT_DELIVERY_CODE) {
-                    if ($promotion->discount_type === Promotion::DISCOUNT_TYPE_SUM) {
-                        $deliveryDiscountSum += $promotion->discount;
-
-                        $hasPromotion = true;
-                    } elseif ($promotion->discount_type === Promotion::DISCOUNT_TYPE_PERCENT) {
-                        $deliveryDiscountSum += $deliverySum * $promotion->discount / 100;
-
-                        $hasPromotion = true;
-                    }
-                }
-
-                // Фіксована знажка на замовлення (на суму товарів в замовленні)
-                elseif ($promotion->type === Promotion::TYPE_DISCOUNT_ORDER_CODE) {
-                    if ($promotion->discount_type === Promotion::DISCOUNT_TYPE_SUM) {
-                        if ($this->order->purchasesSum() > ($discountSum + $promotion->discount)) {
-                            $discountSum = $discountSum + $promotion->discount;
-
-                            $hasPromotion = true;
-                        }
-                    } elseif ($promotion->discount_type === Promotion::DISCOUNT_TYPE_PERCENT) {
-                        $discountSum = $discountSum + ($this->order->purchasesSum() * $promotion->discount / 100);
-
-                        $hasPromotion = true;
-                    }
-                }
-            }
-
-            // Безкоштовна доставка на період
-            foreach ($promotions->where('type', Promotion::TYPE_FREE_DELIVERY_DATE) as $promotion) {
-                $isFreeDelivery = true;
-
-                $hasPromotion = true;
-            }
-
-            $this->order->fill([
-                'discount_sum' => $discountSum,
-                'delivery_sum' => $deliverySum ?: $this->order->delivery_sum,
-                'delivery_discount_sum' => $deliveryDiscountSum,
-            ]);
-
-            $this->order->setAttribute('added->is_free_delivery', $isFreeDelivery);
-
-            $this->order->setAttribute('added->has_promotion', $hasPromotion);
-
-            $this->order->save();
-            //$this->order->refresh();
-            return true;
-        }
-    }
+//    protected function recalculateWithPromo()
+//    {
+//        if ($this->order) {
+//
+//            $deliverySum = \Variable::getArray('shipping.postal.price', 0, \Domain::getGroup());
+//
+//            $discountSum = 0;
+//            $deliveryDiscountSum = 0;
+//            $isFreeDelivery = false;
+//            $hasPromotion = false;
+//
+//            if ($this->order->purchases->count() < 1) {
+//                $this->order->fill([
+//                    'discount_sum' => 0,
+//                    'delivery_sum' => 0,
+//                    'delivery_discount_sum' => 0,
+//                ]);
+//
+//                $this->order->setAttribute('added->is_free_delivery', false);
+//
+//                $this->order->setAttribute('added->has_promotion', false);
+//
+//                $this->order->save();
+//
+//                $this->order->discounts()->delete();
+//
+//                return true;
+//            }
+//
+//            // Варіації (екземпляри), які уже взяли участь в знижці
+//            $variationsAlreadyHasDiscountIds = [];
+//
+//            $promotions = Promotion::isActive()->with('variations:id', 'terms:id')
+//                ->select('id', 'added', 'discount_type', 'discount', 'type')
+//                ->get();
+//                //->filter(fn(Promotion $p) => $p->isAllowedForUser());
+//
+//            // TODO check: Зжижки при покупці кількості екземпляра варіації
+//            foreach ($this->order->purchases as $purchase) {
+//                foreach ($promotions->where('type', Promotion::TYPE_DISCOUNT_VARIATION_COUNT) as $promotion) {
+//                    if ($discounts = $promotion->added['conditions'] ?? []) {
+//                        usort($discounts, function ($item1, $item2) {
+//                            return $item2['count'] <=> $item1['count'];
+//                        });
+//                        if ($promotion->variations->contains('id', $purchase->model_id)) {
+//                            foreach ($discounts as $discountData) {
+//
+//                                if ($purchase->quantity >= $discountData['count']) {
+//                                    if ($promotion->discount_type === Promotion::DISCOUNT_TYPE_SUM) {
+//                                        $discountVal = $discountData['discount'] ?? 0;
+//                                        //$discountSum = $discountSum + $discountVal;
+//                                        $purchase->setAttribute('discount', $discountVal)->save();
+//                                        $variationsAlreadyHasDiscountIds[] = $purchase->model_id;
+//
+//                                        $hasPromotion = true;
+//                                    } elseif ($promotion->discount_type === Promotion::DISCOUNT_TYPE_PERCENT) {
+//                                        $discountVal = ($purchase->price - ($purchase->price - ($discountData['discount'] ?? 0) * $purchase->price / 100));
+//                                        //$discountSum = $discountSum + $discountVal;
+//                                        $purchase->setAttribute('discount', $discountVal)->save();
+//                                        $variationsAlreadyHasDiscountIds[] = $purchase->model_id;
+//
+//                                        $hasPromotion = true;
+//                                    }
+//                                    break;
+//                                }
+//                            }
+//
+//                        }
+//                    }
+//                }
+//            }
+//
+//            // Знижка на замовлення при покупці сумарної кількості вказаних варіацій
+//            /** @var Promotion $promotion */
+//            foreach ($promotions->where('type', Promotion::TYPE_DISCOUNT_VARIATIONS_COUNT) as $promotion) {
+//
+//                if ($discounts = $promotion->added['conditions'] ?? []) {
+//                    usort($discounts, function ($item1, $item2) {
+//                        return $item2['count'] <=> $item1['count'];
+//                    });
+//
+//                    $variationsIds = ProductVariation::query()->byPromotionVariations($promotion)->select('id')->get()->pluck('id')->toArray();
+//
+//                    $purchases = $this->order->purchases
+//                        ->whereNotIn('model_id', $variationsAlreadyHasDiscountIds)
+//                        ->whereIn('model_id', $variationsIds);
+//                    $quantity = $purchases->sum('quantity');
+//                    $sum = $purchases->sum(fn($p) => $p->price * $p->quantity);
+//
+//                    if ($quantity < 1) {
+//                        break;
+//                    }
+//
+//                    $avgPrice = $sum/* / $quantity*/;
+//
+//                    foreach ($discounts as $discountData) {
+//                        if ($quantity >= $discountData['count']) {
+//                            if ($promotion->discount_type === Promotion::DISCOUNT_TYPE_SUM) {
+//                                $discountVal = $discountData['discount'] ?? 0;
+//                                $discountSum = $discountSum + $discountVal;
+//                                $variationsAlreadyHasDiscountIds = array_merge($variationsAlreadyHasDiscountIds, $purchases->pluck('model_id')->toArray());
+//
+//                                $hasPromotion = true;
+//                            } elseif ($promotion->discount_type === Promotion::DISCOUNT_TYPE_PERCENT) {
+//                                $discountVal = ($avgPrice - ($avgPrice - ($discountData['discount'] ?? 0) * $avgPrice / 100));
+//                                $discountSum += $discountSum + $discountVal;
+//                                $variationsAlreadyHasDiscountIds = array_merge($variationsAlreadyHasDiscountIds, $purchases->pluck('model_id')->toArray());
+//
+//                                $hasPromotion = true;
+//                            }
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+//
+//            // Знижка на суму замовлення при мінімальній сумі товарів замовлення
+//            foreach ($promotions->where('type', Promotion::TYPE_DISCOUNT_ORDER_SUM) as $promotion) {
+//                $sum = $this->order->purchases->sum(fn($p) => $p->price * $p->quantity);
+//
+//                if ($sum >= ($promotion->added['conditions']['sum'] ?? 0)) {
+//                    if ($promotion->discount_type === Promotion::DISCOUNT_TYPE_SUM) {
+//                        $discountSum += $promotion->discount;
+//
+//                        $hasPromotion = true;
+//                    } elseif ($promotion->discount_type === Promotion::DISCOUNT_TYPE_PERCENT) {
+//                        $discountSum = $discountSum + ($sum * $promotion->discount / 100);
+//
+//                        $hasPromotion = true;
+//                    }
+//                    break;
+//                }
+//            }
+//
+//            // Безкоштовна доставка на суму замовлення при мінімальній сумі товарів замовлення
+//            foreach ($promotions->where('type', Promotion::TYPE_FREE_DELIVERY_ORDER_SUM) as $promotion) {
+//                $sum = $this->order->purchases->sum(fn($p) => $p->price * $p->quantity);
+//
+//                if ($sum >= ($promotion->added['conditions']['sum'] ?? 0)) {
+//                    $isFreeDelivery = true;
+//
+//                    $hasPromotion = true;
+//                    break;
+//                }
+//            }
+//
+//            // Знижки застосовані промокодами
+//            /** @var Discount $discount */
+//            foreach ($this->order->discounts as $discount) {
+//
+//                if (($discount->promocode->used_limit > 0) && (!$discount->promocode?->isAllowed())) {
+//                    $discount->delete();
+//                    continue;
+//                }
+//
+//                /** @var Promotion $promotion */
+//                $promotion = $discount->promotion;
+//
+//                // Безкоштована доставка
+//                if (in_array($promotion->type, [Promotion::TYPE_FREE_DELIVERY_CODE, Promotion::TYPE_FREE_DELIVERY_CODE_RULES])) {
+//                    $deliverySum = $deliverySum ?: $this->order->delivery_sum;
+//                    $deliveryDiscountSum = $deliverySum;
+//
+//                    $isFreeDelivery = true;
+//
+//                    $hasPromotion = true;
+//                }
+//
+//                // Знижка на вартість доставки
+//                if ($promotion->type === Promotion::TYPE_DISCOUNT_DELIVERY_CODE) {
+//                    if ($promotion->discount_type === Promotion::DISCOUNT_TYPE_SUM) {
+//                        $deliveryDiscountSum += $promotion->discount;
+//
+//                        $hasPromotion = true;
+//                    } elseif ($promotion->discount_type === Promotion::DISCOUNT_TYPE_PERCENT) {
+//                        $deliveryDiscountSum += $deliverySum * $promotion->discount / 100;
+//
+//                        $hasPromotion = true;
+//                    }
+//                }
+//
+//                // Фіксована знажка на замовлення (на суму товарів в замовленні)
+//                elseif ($promotion->type === Promotion::TYPE_DISCOUNT_ORDER_CODE) {
+//                    if ($promotion->discount_type === Promotion::DISCOUNT_TYPE_SUM) {
+//                        if ($this->order->purchasesSum() > ($discountSum + $promotion->discount)) {
+//                            $discountSum = $discountSum + $promotion->discount;
+//
+//                            $hasPromotion = true;
+//                        }
+//                    } elseif ($promotion->discount_type === Promotion::DISCOUNT_TYPE_PERCENT) {
+//                        $discountSum = $discountSum + ($this->order->purchasesSum() * $promotion->discount / 100);
+//
+//                        $hasPromotion = true;
+//                    }
+//                }
+//            }
+//
+//            // Безкоштовна доставка на період
+//            foreach ($promotions->where('type', Promotion::TYPE_FREE_DELIVERY_DATE) as $promotion) {
+//                $isFreeDelivery = true;
+//
+//                $hasPromotion = true;
+//            }
+//
+//            $this->order->fill([
+//                'discount_sum' => $discountSum,
+//                'delivery_sum' => $deliverySum ?: $this->order->delivery_sum,
+//                'delivery_discount_sum' => $deliveryDiscountSum,
+//            ]);
+//
+//            $this->order->setAttribute('added->is_free_delivery', $isFreeDelivery);
+//
+//            $this->order->setAttribute('added->has_promotion', $hasPromotion);
+//
+//            $this->order->save();
+//            //$this->order->refresh();
+//            return true;
+//        }
+//    }
 
     /**
      * Отримати промокод (перший з списку).
@@ -687,7 +675,7 @@ class Cart
         }
 
         $this->order->refresh();
-        $this->recalculateWithPromo();
+//        $this->recalculateWithPromo();
 
         return $report;
     }
@@ -703,7 +691,7 @@ class Cart
 
         if ($this->order) {
             $this->order->purchases()->delete();
-            $this->recalculateWithPromo();
+//            $this->recalculateWithPromo();
         }
 
         return $this;
@@ -739,9 +727,8 @@ class Cart
 
 
         // Валідація на кількості позицій і сум в корзині для ролей юзера
-        if (\Domain::getOpt('shop.roles_qty')) {
+        if (false) {
             $userRole = auth()->user()?->roles->first()->name ?: User::ROLE_GUEST; // TODO
-            $group = \Domain::getSelected('id');
 
             // мінімальна кількість в корзині
             $minQty = \Variable::getArray("shop.{$userRole}.cart.min_qty", 0, $group) || \Domain::getOpt('orders.min_qty');
@@ -768,7 +755,7 @@ class Cart
 
         // СКЛАД
         // кількості
-        if (\Domain::getOpt('warehouses.on')) {
+        if (false) {
 
             $res = [];
             // кратність
@@ -841,13 +828,13 @@ class Cart
             if (empty($order->number)) {
                 $order->setAttribute('number', $this->makeOrderNumber());
             }
-            if ($status = Arr::get($data, 'status', Item::getSettingsValue(Item::TYPE_ORDER_STATUS, Item::SETTINGS_CART_TRANSIT_TO_ORDER, 'pending'))) {
+            if ($status = Arr::get($data, 'status', 'pending')) {
                 $order->setAttribute('status', $status);
             }
 
             $order->setAttribute('currency_code', $order->domain?->currency_code ?? 'UAH');
             if (empty($order->locale_code)) {
-                $order->setAttribute('locale_code', Arr::get($data, 'locale_code', \Domain::getLocale()));
+                $order->setAttribute('locale_code', Arr::get($data, 'locale_code', 'uk'));
             }
             if (empty($order->user_id) || Arr::has($data, 'user_id')) {
                 $order->setAttribute('user_id', Arr::get($data, 'user_id'));
@@ -870,10 +857,6 @@ class Cart
 
             $order->saveQuietly();
 
-            if (is_null($order->ordered_at) && !Arr::get($data, 'ordered')) {
-                OrderOrdered::dispatch($order);
-            }
-
             // в корзині натиснуто Перейти до оплати
             if (Arr::get($data, 'preordered')) {
                 $order->setAttribute('ordered_at', now());
@@ -885,31 +868,31 @@ class Cart
                 $order->doOrder();
             }
 
-            foreach ($order->discounts->whereNotNull('promocode_id') as $discount) {
-                // якщо був раз використаний (used_count), то другий раз не можна уже
-                if ($discount->promocode_used === 0) {
-                    $discount->increment('promocode_used');
-                    $discount->promocode->increment('used_count');
-                }
-            }
+//            foreach ($order->discounts->whereNotNull('promocode_id') as $discount) {
+//                // якщо був раз використаний (used_count), то другий раз не можна уже
+//                if ($discount->promocode_used === 0) {
+//                    $discount->increment('promocode_used');
+//                    $discount->promocode->increment('used_count');
+//                }
+//            }
 
             $this->order = null;
             $this->id = '';
-
-            if (Arr::get($data, 'ordersending') && Arr::get($data, 'shipping.method')) {
-                $ordersending = $order->ordersendings()->firstOrCreate(['service' => Arr::get($data, 'shipping.method')], []);
-
-                if ($order->isFreeDelivery()) {
-                    if (in_array($ordersending->service, ['novaposhta', 'novaposhta_locker', 'novaposhta_courier'])) {
-                        $ordersending->setAttribute('params->PayerType', 'Sender');
-                        $ordersending->save();
-                    }
-                    elseif (in_array($ordersending->service, ['ukrposhta'])) {
-                        $ordersending->setAttribute('params->paidByRecipient', false);
-                        $ordersending->save();
-                    }
-                }
-            }
+//
+//            if (Arr::get($data, 'ordersending') && Arr::get($data, 'shipping.method')) {
+//                $ordersending = $order->ordersendings()->firstOrCreate(['service' => Arr::get($data, 'shipping.method')], []);
+//
+//                if ($order->isFreeDelivery()) {
+//                    if (in_array($ordersending->service, ['novaposhta', 'novaposhta_locker', 'novaposhta_courier'])) {
+//                        $ordersending->setAttribute('params->PayerType', 'Sender');
+//                        $ordersending->save();
+//                    }
+//                    elseif (in_array($ordersending->service, ['ukrposhta'])) {
+//                        $ordersending->setAttribute('params->paidByRecipient', false);
+//                        $ordersending->save();
+//                    }
+//                }
+//            }
 
             return $order;
         }
@@ -917,20 +900,12 @@ class Cart
         return false;
     }
 
-    public function makeOrderNumber($varGroup = null): string
+    public function makeOrderNumber(): string
     {
-        $varGroup = $varGroup ?:\Domain::getSelected('id');
+        $number = intval(\Variable::useCache(false)->get('shop_orders', 1000)) + 1;
 
-        $number = intval(\Variable::useCache(false)->get('shop_orders', 1000, $varGroup)) + 1;
-        \Variable::save('shop_orders', $number, $varGroup);
+        \Variable::save('shop_orders', $number);
 
-        $template = trim(\Domain::getOpt('orders.number_template', ''));
-        if (strpos($template, '[number]') !== false) {
-            $number = str_replace('[number]', $number, $template);
-        } elseif ($template) {
-            $number = $template . $number;
-        }
-
-        return $number;
+        return (string)$number;
     }
 }

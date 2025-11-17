@@ -28,28 +28,20 @@
                         <p>Атрибути</p>
                     </a>
                 </li>
-{{--                @if(\Domain::getOptIs('products.fields.tags'))--}}
-{{--                    <li class="nav-item">--}}
-{{--                        <a href="/admin/terms?vocabulary=tags" class="nav-link" data-pat="vocabulary=tags">--}}
-{{--                            <i class="nav-icon far fa-circle"></i>--}}
-{{--                            <p>Теги</p>--}}
-{{--                        </a>--}}
-{{--                    </li>--}}
-{{--                @endif--}}
             </ul>
         </li>
 
-{{--        <li class="nav-item">--}}
-{{--            <a href="/admin/orders" class="nav-link" data-pat="orders">--}}
-{{--                <i class="nav-icon fas fa-inbox"></i>--}}
-{{--                <p>--}}
-{{--                    Замовлення--}}
-{{--                    @if($count = \App\Models\Order::whereType(\App\Models\Order::TYPE_ORDER)->wherePerform(\App\Models\Order::PERFORM_PENDING)->count())--}}
-{{--                        <span class="badge badge-warning right">{{ $count }}</span>--}}
-{{--                    @endif--}}
-{{--                </p>--}}
-{{--            </a>--}}
-{{--        </li>--}}
+        <li class="nav-item">
+            <a href="/admin/orders" class="nav-link" data-pat="orders">
+                <i class="nav-icon fas fa-inbox"></i>
+                <p>
+                    Замовлення
+                    @if($count = \App\Models\Order::whereType(\App\Models\Order::TYPE_ORDER)->wherePerform(\App\Models\Order::PERFORM_PENDING)->count())
+                        <span class="badge badge-warning right">{{ $count }}</span>
+                    @endif
+                </p>
+            </a>
+        </li>
 
 {{--        @if(\Domain::getOpt('leads.on', null, 'lead.read'))--}}
 {{--            <li class="nav-item">--}}
@@ -131,14 +123,12 @@
 {{--            </li>--}}
 {{--        @endif--}}
 
-{{--        @if(\Domain::getOpt('settings.on', null, ['settings.system', 'settings.content', 'seo.manage']))--}}
-{{--            <li class="nav-item">--}}
-{{--                <a href="/admin/settings" class="nav-link" data-pat="settings|translations">--}}
-{{--                    <i class="nav-icon fas fa-cogs"></i>--}}
-{{--                    <p>Налаштування</p>--}}
-{{--                </a>--}}
-{{--            </li>--}}
-{{--        @endif--}}
+        <li class="nav-item">
+            <a href="/admin/settings" class="nav-link" data-pat="settings|translations">
+                <i class="nav-icon fas fa-cogs"></i>
+                <p>Налаштування</p>
+            </a>
+        </li>
 
         <li class="nav-item">
             <a href="/admin/users" class="nav-link" data-pat="users">

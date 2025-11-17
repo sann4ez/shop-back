@@ -1,0 +1,6 @@
+{
+    "name": "plante",
+    "extends": "",
+    "asset-path": "client/themes/plante",
+    "test": "ex"
+}

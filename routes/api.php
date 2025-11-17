@@ -43,7 +43,6 @@ Route::group(['middleware' => [
     // SUGGEST
     Route::controller(\App\Http\Client\Api\Controllers\SuggestController::class)->group(function() {
 
-        // TODO: Deprecated
         Route::get('suggest/variables', 'variables');
         Route::get('suggest/static-lists', 'staticLists');
         Route::get('suggest/vocabularies', 'vocabularies');

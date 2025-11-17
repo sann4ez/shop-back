@@ -61,6 +61,44 @@ Route::group([
     // SUGGESTS
     Route::get('suggest/terms', [\App\Http\Admin\Controllers\SuggestController::class, 'terms'])->name('suggest.terms');
     Route::get('suggest/product-variations', [\App\Http\Admin\Controllers\SuggestController::class, 'productVariations'])->name('suggest.product-variations');
+    Route::get('suggest/users', [\App\Http\Admin\Controllers\SuggestController::class, 'users'])->name('suggest.users');
+
+    // ORDERS
+    Route::resource('orders', \App\Http\Admin\Controllers\OrderController::class);
+    Route::get('orders/{order}/print', [\App\Http\Admin\Controllers\OrderController::class, 'printed'])->name('orders.print');
+    Route::get('orders/{order}/email', [\App\Http\Admin\Controllers\OrderController::class, 'email'])->name('orders.email');
+    Route::post('orders/{order}/email-send', [\App\Http\Admin\Controllers\OrderController::class, 'emailSend'])->name('orders.email.send');
+    Route::post('orders/{order}/discounts', [\App\Http\Admin\Controllers\OrderController::class, 'discountAdd'])->name('orders.discounts.add');
+    Route::post('orders/{order}/editable', [\App\Http\Admin\Controllers\OrderController::class, 'editable'])->name('orders.editable');
+
+    // PURCHASES
+    Route::post('orders/purchases/{purchase}/editable', [\App\Http\Admin\Controllers\OrderPurchaseController::class, 'editable'])->name('orders.purchases.editable');
+    Route::post('orders/{order}/purchases', [\App\Http\Admin\Controllers\OrderPurchaseController::class, 'add'])->name('orders.purchases.add');
+    Route::delete('orders/purchases/{purchase}', [\App\Http\Admin\Controllers\OrderPurchaseController::class, 'destroy'])->name('orders.purchases.delete');
+
+    // ORDER PAYMENTS
+    Route::get('orders/{order}/payments', [\App\Http\Admin\Controllers\OrderPaymentController::class, 'create'])->name('orders.payments.create');
+    Route::get('orders/{order}/create-expense', [\App\Http\Admin\Controllers\OrderPaymentController::class, 'createExpense'])->name('orders.payments.create-expense');
+    Route::post('orders/{order}/payments', [\App\Http\Admin\Controllers\OrderPaymentController::class, 'store'])->name('orders.payments.store');
+    Route::get('orders/payments/{payment}', [\App\Http\Admin\Controllers\OrderPaymentController::class, 'create'])->name('orders.payments.edit');
+    Route::patch('orders/payments/{payment}', [\App\Http\Admin\Controllers\OrderPaymentController::class, 'store'])->name('orders.payments.update');
+    Route::delete('orders/payments/{payment}', [\App\Http\Admin\Controllers\OrderPaymentController::class, 'destroy'])->name('orders.payments.destroy');
+    Route::post('orders/payments/{payment}/editable', [\App\Http\Admin\Controllers\OrderPaymentController::class, 'editable'])->name('orders.payments.editable');
+
+    // PAYMENTS
+    Route::resource('payments', \App\Http\Admin\Controllers\PaymentController::class, ['except' => 'show'])->middleware('can:payment.read');
+    Route::post('payments/{payment}/relink', [\App\Http\Admin\Controllers\PaymentController::class, 'relink'])->name('payments.relink');
+    Route::post('payments/{payment}/editable', [\App\Http\Admin\Controllers\PaymentController::class, 'editable'])->name('payments.editable');
+
+    // SYSTEM SERVICES
+    Route::view('logs', 'admin.settings.sections.logs')->name('logs.index');
+    Route::get('flogs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index'])->name('flogs');
+    Route::view('tinker', 'admin.settings.sections.tinker')->name('tinker.index')->middleware('can:dev');
+
+    // SETTINGS
+    Route::redirect('settings', '/admin/settings/common');
+    Route::get('settings/{section}', [\App\Http\Admin\Controllers\SettingsController::class, 'edit'])->name('settings.edit');
+    Route::post('settings/save', [\App\Http\Admin\Controllers\SettingsController::class, 'save'])->name('settings.save');
 });
 
 Route::group([

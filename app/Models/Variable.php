@@ -58,7 +58,7 @@ class Variable extends \Fomvasss\Variable\Models\Variable
                 'title' => 'Платіжні системи',
                 'key' => 'payments',
                 'fa_icon' => 'fas fa-credit-card',
-                'perm' => 'settings.system',
+                'perm' => '',
             ],
             [
                 'title' => 'Платіжні системи ∞',
@@ -164,7 +164,7 @@ class Variable extends \Fomvasss\Variable\Models\Variable
             ],
         ];
 
-        return self::staticListBuild($records, $columnKey, $indexKey, array_merge( ['only' => \Domain::getOpt('settings.sections', [])], $options));
+        return self::staticListBuild($records, $columnKey, $indexKey, $options);
     }
 
 

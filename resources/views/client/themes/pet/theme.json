@@ -1,0 +1,6 @@
+{
+    "name": "pet",
+    "extends": "",
+    "asset-path": "client/themes/pet",
+    "test": "ex"
+}

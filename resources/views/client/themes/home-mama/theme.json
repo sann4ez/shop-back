@@ -1,0 +1,6 @@
+{
+    "name": "home-mama",
+    "extends": "",
+    "asset-path": "client/themes/home-mama",
+    "test": "ex"
+}

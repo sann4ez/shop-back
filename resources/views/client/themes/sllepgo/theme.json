@@ -1,0 +1,6 @@
+{
+    "name": "sllepgo",
+    "extends": "",
+    "asset-path": "client/themes/sllepgo",
+    "test": "ex"
+}

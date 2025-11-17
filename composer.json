@@ -7,6 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
         "fomvasss/laravel-blocks": "^1.4",
         "fomvasss/laravel-lte3": "^1.86",
         "fomvasss/laravel-medialibrary-extension": "^6.2",
