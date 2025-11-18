@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Actions\Terms;
+namespace App\Actions;
 
-use App\Models\Post;
-use App\Models\Shop\Product;
+use App\Models\Product;
 use App\Models\Term;
 use Lorisleiva\Actions\Concerns\AsAction;
 

@@ -2,9 +2,11 @@
 
 namespace App\Http\Admin\Controllers;
 
+use App\Actions\ReindexVariationAction;
 use App\Models\Block;
 use App\Models\Page;
 use App\Http\Admin\Requests\PageRequest;
+use App\Models\ProductVariation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
@@ -12,6 +14,12 @@ final class PageController extends Controller
 {
     public function index(Request $request)
     {
+        $variations = ProductVariation::all();
+
+        foreach ($variations as $variation) {
+            ReindexVariationAction::run($variation);
+        }
+
         $pages = Page::latest();
 
         return view('admin.pages.index', ['pages' => $pages->paginate()]);

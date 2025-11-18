@@ -7,6 +7,7 @@ use App\Http\Client\Api\Resources\ProductCategoryShowResource;
 use App\Http\Client\Api\Resources\ProductVariationShowResource;
 use App\Http\Client\Api\Resources\ProductVariationListResource;
 use App\Http\Client\Api\Resources\ProductVariationSwitchingResource;
+use App\Http\Client\Api\Resources\SeoResource;
 use App\Http\Client\Api\Resources\TermSimpleResource;
 use App\Models\Product;
 use App\Models\ProductVariation;
@@ -605,6 +606,52 @@ final class ShopController extends Controller
             ->get()->toTree();
 
         return ProductCategoryListResource::collection($categories);
+    }
+
+    /**
+     *  @api {get} /api/shop/categories/{category:slug} 05. Одна категорія
+     *  @apiVersion 1.0.0
+     *  @apiName ShopCategory
+     *  @apiGroup Shop
+     *
+     *  @apiSuccessExample {json} Response-Success: HTTP/1.1 200 OK
+     *  {
+     *      "data": {
+     *          "id": "47439c16-0912-48fd-ae10-2e97e3f2a1de",
+     *          "entity": "product_categories",
+     *          "slug": "dlia-kotiv",
+     *          "name": "Для котів",
+     *          "body": null,
+     *          "icon": null,
+     *          "image": null,
+     *          "logo": null,
+     *          "filter": {
+     *              "groped_type": null
+     *          }
+     *      },
+     *      "seo": {
+     *          "metatags": {
+     *              "title": " - Dropshop",
+     *              "robots": "index, follow",
+     *              "og_site_name": "Dropshop",
+     *              "og_locale": "uk",
+     *              "og_title": " - Dropshop",
+     *              "og_type": "page",
+     *              "twitter_title": " - Dropshop"
+     *          },
+     *          "h1": "",
+     *          "text": "",
+     *          "faq": []
+     *      },
+     *      "crumbs": [],
+     *      "sblocks": []
+     *  }
+     */
+    public function category(Request $request, Term $category)
+    {
+        $category->checkAllowed()->load('media', 'ancestors');
+
+        return \App\Http\Client\Api\Resources\ProductCategoryShowResource::make($category);
     }
 
     /**

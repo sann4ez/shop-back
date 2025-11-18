@@ -131,9 +131,9 @@ class Term extends \Fomvasss\SimpleTaxonomy\Models\Term implements HasMedia
 
     public function checkAllowed()
     {
-        if ($this->status !== self::STATUS_PUBLISHED) {
-            abort(404);
-        }
+//        if ($this->status !== self::STATUS_PUBLISHED) {
+//            abort(404);
+//        }
 
         return $this;
     }

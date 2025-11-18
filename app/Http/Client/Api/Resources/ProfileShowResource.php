@@ -1,9 +1,7 @@
 <?php
 
-namespace App\Http\Client\Api\Resources\Profile;
+namespace App\Http\Client\Api\Resources;
 
-use App\Http\Client\Api\Resources\MediaShowResource;
-use App\Http\Client\Api\Resources\Terms\TermSimpleResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 final class ProfileShowResource extends JsonResource

@@ -81,11 +81,12 @@ Route::group(['middleware' => [
         Route::post('order/{order}/repeat', 'repeat');
     });
 
-    // PROMOTIONS
-    Route::controller(\App\Http\Client\Api\Controllers\PromotionController::class)->group(function () {
-        Route::get('promotions', 'index');
-        Route::get('promotions/{promotion:slug}', 'show');
-    });
+    // CONTENT
+    Route::get('app/glob', [\App\Http\Client\Api\Controllers\AppController::class, 'glob']);
+    Route::get('app/content', [\App\Http\Client\Api\Controllers\AppController::class, 'glob']); // TODO: Deprecated!
+    Route::get('app/slug/{slug}', [\App\Http\Client\Api\Controllers\AppController::class, 'slug']);
+    Route::get('app/translations', [\App\Http\Client\Api\Controllers\AppController::class, 'translations']);
+    Route::get('app/menu/catalog', [\App\Http\Client\Api\Controllers\AppController::class, 'menuCatalog']);
 
     // BLOCK
 //    Route::get('blocks', [\App\Http\Client\Api\Controllers\BlockController::class, 'index']);
