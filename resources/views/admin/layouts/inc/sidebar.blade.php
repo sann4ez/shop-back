@@ -25,10 +25,7 @@
 
         @include('admin.layouts.inc.sidebar-menu.shop')
 
-        @can('dev')
-            @include('admin.layouts.inc.sidebar-menu.system')
-        @endcan
-
+        @include('admin.layouts.inc.sidebar-menu.system')
     </div>
     <!-- /.sidebar -->
   </aside>

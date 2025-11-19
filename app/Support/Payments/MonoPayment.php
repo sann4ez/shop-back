@@ -26,7 +26,7 @@ final class MonoPayment
 
     public function __construct(array $options = [])
     {
-        $group = Arr::get($options, 'group') ?: \Domain::getId();
+        $group = 'default';
 
         $this->paymentToken = Arr::get($options, 'payment_token') ?? \Variable::getArray('payments.monobank.payment_token', '', $group);
         $this->fiscal = Arr::get($options, 'fiscal') ?? \Variable::getArray('payments.monobank.fiscal', false, $group);
@@ -67,7 +67,8 @@ final class MonoPayment
                 'reference' => $order->number,
                 'destination' => "Замовлення #{$order->number}",
             ],
-            'webHookUrl' => route('webhooks.payment.notify', ['monobank']),
+            //'webHookUrl' => route('webhooks.payment.notify', ['monobank']),
+            'webHookUrl' => "https://model-dassie-comic.ngrok-free.app/webhooks/payment/notify/monobank",
             'redirectUrl' => route('payment.info', ['progress', 'order_number' => $order->number]),
         ];
 

@@ -19,7 +19,7 @@
 
         @if(file_exists(public_path('/docs')))
         <li class="nav-item">
-            <a href="/admin/system/docs" class="nav-link">
+            <a href="/docs" target="_blank" class="nav-link">
                 <i class="nav-icon fas fa-file-code"></i>
                 <p>API-Docs</p>
             </a>

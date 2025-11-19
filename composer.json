@@ -24,6 +24,7 @@
         "lorisleiva/laravel-actions": "^2.9",
         "propaganistas/laravel-phone": "^6.0",
         "spatie/laravel-permission": "^6.22",
+        "spatie/laravel-web-tinker": "^1.10",
         "unisharp/laravel-filemanager": "^2.12"
     },
     "require-dev": {

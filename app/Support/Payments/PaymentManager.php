@@ -143,7 +143,7 @@ final class PaymentManager
             if ($payment->status === Payment::STATUS_PAID) {
                 $payment->model->doOrder();
 
-                if (in_array('onlinepaid', \Variable::getArray('checkbox.receipt_fiscal_events', [], $payment->model->getDomainId()))) {
+                if (in_array('onlinepaid', \Variable::getArray('checkbox.receipt_fiscal_events', [], 'default'))) {
                     Log::info(__METHOD__ . " Платіж [{$payment->id}] оплачено. Запит на фіскалізацію відправлено...");
                 }
 

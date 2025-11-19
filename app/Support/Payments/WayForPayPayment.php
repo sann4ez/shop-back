@@ -62,7 +62,8 @@ final class WayForPayPayment
                 'productPrice' => [$amount],
                 'merchantSignature' => $signature,
                 'returnUrl' => route('payment.info', ['progress', 'order_number' => $order->number]),
-                'serviceUrl' => route('webhooks.payment.notify', ['wayforpay']),
+                'serviceUrl' => "https://model-dassie-comic.ngrok-free.app/webhooks/payment/notify/wayforpay",
+                //'serviceUrl' => route('webhooks.payment.notify', ['wayforpay']),
             ]);
 
             if (isset($response->json()['reason'])) {

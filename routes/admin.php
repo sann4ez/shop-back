@@ -90,10 +90,11 @@ Route::group([
     Route::post('payments/{payment}/relink', [\App\Http\Admin\Controllers\PaymentController::class, 'relink'])->name('payments.relink');
     Route::post('payments/{payment}/editable', [\App\Http\Admin\Controllers\PaymentController::class, 'editable'])->name('payments.editable');
 
-    // SYSTEM SERVICES
+    // SYSTEM
+    Route::view('system/logs', 'admin.system.logs')->name('admin.system.logs');
+    Route::view('system/tinker', 'admin.system.tinker');
+    Route::get('flogs', [\Ka4ivan\LaravelLogger\Http\Controllers\LogViewerController::class, 'index'])->name('flogs');
     Route::view('logs', 'admin.settings.sections.logs')->name('logs.index');
-    Route::get('flogs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index'])->name('flogs');
-    Route::view('tinker', 'admin.settings.sections.tinker')->name('tinker.index')->middleware('can:dev');
 
     // SETTINGS
     Route::redirect('settings', '/admin/settings/common');

@@ -28,7 +28,7 @@ final class ProductVariationShowResource extends JsonResource
             'product' => $this->whenLoaded('product', fn () => ProductShowResource::make($this->product)),
         ];
 
-        $res['specification'] = match ('getAttributesPropertiesList2') {
+        $res['specification'] = match ('getAttributesPropertiesList21') {
             'getAttributesPropertiesList2' => $this->whenLoaded('properties', fn()=> $this->getAttributesPropertiesList2()),
             default => $this->whenLoaded('properties', fn()=> $this->getAttributesPropertiesListArray2('name', 'value')),
         };
